@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Result — SkinAI{% endblock %}
+
+{% block content %}
+<div class="p-8">
+
+    <div class="mb-6">
+        <a href="/predict" class="text-blue-600 hover:text-blue-700 text-sm flex items-center gap-1.5 mb-4 w-fit">
+            <i class="fas fa-arrow-left text-xs"></i> New Analysis
+        </a>
+        <h1 class="text-2xl font-bold text-slate-800">Analysis Result</h1>
+    </div>
+
+    <div class="grid grid-cols-2 gap-6 max-w-4xl">
+
+        <!-- Image -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+            <h2 class="font-semibold text-slate-700 mb-4">Uploaded Image</h2>
+            <img src="/{{ patient.image_path }}" class="w-full rounded-lg object-cover max-h-72 shadow-sm">
+        </div>
+
+        <!-- Diagnosis -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+            <h2 class="font-semibold text-slate-700 mb-4">Diagnosis</h2>
+
+            <span class="px-3 py-1.5 rounded-full text-sm font-semibold
+                {% if patient.risk_level == 'Malignant'     %}bg-red-100    text-red-700
+                {% elif patient.risk_level == 'Pre-malignant' %}bg-yellow-100 text-yellow-700
+                {% else %}bg-green-100 text-green-700{% endif %}">
+                {{ patient.risk_level }}
+            </span>
+
+            <h3 class="text-2xl font-bold text-slate-800 mt-3 mb-1">{{ patient.diagnosis }}</h3>
+            <p class="text-slate-400 text-sm mb-6">Code: {{ patient.short_code }}</p>
+
+            <!-- Confidence bar -->
+            <div class="mb-6">
+                <div class="flex justify-between text-sm mb-1.5">
+                    <span class="text-slate-600">Model Confidence</span>
+                    <span class="font-semibold text-slate-800">{{ patient.confidence }}%</span>
+                </div>
+                <div class="w-full bg-slate-100 rounded-full h-2.5">
+                    <div class="h-2.5 rounded-full transition-all
+                        {% if patient.risk_level == 'Malignant'     %}bg-red-500
+                        {% elif patient.risk_level == 'Pre-malignant' %}bg-yellow-500
+                        {% else %}bg-green-500{% endif %}"
+                        style="width: {{ patient.confidence }}%">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Patient details -->
+            <div class="border-t border-slate-100 pt-4 space-y-2.5">
+                {% for label, value in [
+                    ("Patient",     patient.name),
+                    ("Age",         patient.age ~ " years"),
+                    ("Analyzed by", patient.created_by),
+                    ("Date",        patient.created_at.strftime('%B %d, %Y'))
+                ] %}
+                <div class="flex justify-between text-sm">
+                    <span class="text-slate-500">{{ label }}</span>
+                    <span class="font-medium text-slate-700">{{ value }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Action buttons -->
+    <div class="flex gap-3 mt-6 max-w-4xl">
+        <a href="/patients/{{ patient.id }}/pdf"
+           class="bg-slate-800 hover:bg-slate-900 text-white font-medium px-5 py-2.5 rounded-lg
+                  transition-colors flex items-center gap-2">
+            <i class="fas fa-file-pdf"></i> Export PDF Report
+        </a>
+        <a href="/patients"
+           class="bg-white hover:bg-slate-50 text-slate-700 font-medium px-5 py-2.5 rounded-lg
+                  border border-slate-200 transition-colors flex items-center gap-2">
+            <i class="fas fa-list"></i> All Patients
+        </a>
+    </div>
+
+    <!-- Disclaimer -->
+    <div class="max-w-4xl mt-4 bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-3">
+        <i class="fas fa-exclamation-triangle text-amber-500 mt-0.5 flex-shrink-0"></i>
+        <p class="text-sm text-amber-700">
+            <strong>Medical Disclaimer:</strong> This result is AI-generated and should not replace
+            professional medical judgment. Always consult a certified dermatologist.
+        </p>
+    </div>
+</div>
+{% endblock %}
